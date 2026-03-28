@@ -8,12 +8,22 @@ from app.services.user_service import authenticate_user, create_user, get_user
 router = APIRouter()
 
 
-@router.post("/register", response_model=UserRead, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/register",
+    response_model=UserRead,
+    status_code=status.HTTP_201_CREATED,
+    summary="用户注册",
+    description="创建新用户账号，返回创建后的用户基础信息。",
+)
 def register_user(payload: UserCreate, db: Session = Depends(get_db)) -> UserRead:
     return create_user(db, payload)
 
 
-@router.post("/login")
+@router.post(
+    "/login",
+    summary="用户登录",
+    description="校验用户名和密码，成功后返回 mock token。",
+)
 def login(payload: LoginRequest, db: Session = Depends(get_db)) -> dict[str, str]:
     user = authenticate_user(db, payload.username, payload.password)
     if not user:
@@ -21,7 +31,12 @@ def login(payload: LoginRequest, db: Session = Depends(get_db)) -> dict[str, str
     return {"access_token": f"mock-token-{user.id}", "token_type": "bearer"}
 
 
-@router.get("/{user_id}", response_model=UserRead)
+@router.get(
+    "/{user_id}",
+    response_model=UserRead,
+    summary="查询用户详情",
+    description="根据用户 ID 查询用户资料，不存在时返回 404。",
+)
 def read_user(user_id: int, db: Session = Depends(get_db)) -> UserRead:
     user = get_user(db, user_id)
     if not user:
